@@ -51,16 +51,24 @@ class SlackPlugin(notify.NotificationPlugin):
     def color_for_group(self, group):
         return '#' + LEVEL_TO_COLOR.get(group.get_level_display(), 'error')
 
-    def notify_users(self, group, event, fail_silently=False):
+    def webhook_for_project(self, project):
+        return self.get_option('webhook', project)
+
+    def notify_users(self, group, event, fail_silently=False, room=None):
         if not self.is_configured(group.project):
             return
 
-        webhook = self.get_option('webhook', event.project)
+        prefix = 'New event' if group.times_seen == 1 else 'Regression'
+        self.send_event_to_slack(event, prefix)
+
+    def send_event_to_slack(self, event, prefix="Event"):
+        webhook = self.webhook_for_project(event.project)
         project = event.project
         team = event.team
+        group = event.group
 
-        title = '%s on <%s|%s %s>' % (
-            'New event' if group.times_seen == 1 else 'Regression',
+        text = '%s on <%s|%s %s>' % (
+            prefix,
             group.get_absolute_url(),
             team.name.encode('utf-8'),
             project.name.encode('utf-8'),
@@ -74,18 +82,26 @@ class SlackPlugin(notify.NotificationPlugin):
         if message == culprit:
             culprit = ''
 
+        color = self.color_for_group(group)
+        self.send_to_slack(webhook, text, title=message, value=culprit, color=color)
+
+    def send_to_slack(self, webhook, text, title=None, value='', color="#f18500", room=None):
         payload = {
             'parse': 'none',
             'text': title,
-            'attachments': [{
-                'color': self.color_for_group(group),
+        }
+        if title:
+            payload['attachments'] = [{
+                'color': color,
                 'fields': [{
-                    'title': message,
-                    'value': culprit,
+                    'title': title,
+                    'value': value,
                     'short': False,
                 }]
             }]
-        }
+
+        if room:
+            payload['channel'] = room
 
         values = {'payload': json.dumps(payload)}
 
