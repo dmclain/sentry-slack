@@ -13,6 +13,8 @@ from sentry import http
 from sentry.plugins.bases import notify
 from sentry.utils import json
 
+from sentry_slack.actions import NotifySlackRoomAction
+
 import urllib
 
 LEVEL_TO_COLOR = {

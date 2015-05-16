@@ -8,8 +8,8 @@ from sentry.rules.actions.base import EventAction
 
 
 class NotifySlackRoomForm(forms.Form):
-    room = forms.TextField()
-    label = forms.TextField()
+    room = forms.CharField()
+    label = forms.CharField()
 
 
 class NotifySlackRoomAction(EventAction):
