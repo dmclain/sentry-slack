@@ -27,7 +27,7 @@ class NotifySlackRoomAction(EventAction):
             return
 
         prefix = self.get_option('label') or 'Rule Triggered'
-        plugin.send_event_to_slack(event, prefix)
+        plugin.send_event_to_slack(event, prefix, room=room)
 
 
 rules.add(NotifySlackRoomAction)

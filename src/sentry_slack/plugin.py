@@ -56,14 +56,14 @@ class SlackPlugin(notify.NotificationPlugin):
     def webhook_for_project(self, project):
         return self.get_option('webhook', project)
 
-    def notify_users(self, group, event, fail_silently=False, room=None):
+    def notify_users(self, group, event, fail_silently=False):
         if not self.is_configured(group.project):
             return
 
         prefix = 'New event' if group.times_seen == 1 else 'Regression'
         self.send_event_to_slack(event, prefix)
 
-    def send_event_to_slack(self, event, prefix="Event"):
+    def send_event_to_slack(self, event, prefix="Event", room=None):
         webhook = self.webhook_for_project(event.project)
         project = event.project
         team = event.team
@@ -85,12 +85,12 @@ class SlackPlugin(notify.NotificationPlugin):
             culprit = ''
 
         color = self.color_for_group(group)
-        self.send_to_slack(webhook, text, title=message, value=culprit, color=color)
+        self.send_to_slack(webhook, text, title=message, value=culprit, color=color, room=room)
 
     def send_to_slack(self, webhook, text, title=None, value='', color="#f18500", room=None):
         payload = {
             'parse': 'none',
-            'text': title,
+            'text': text,
         }
         if title:
             payload['attachments'] = [{
