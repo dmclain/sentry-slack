@@ -10,12 +10,12 @@ import sentry_slack
 from django import forms
 
 from sentry import http
+from sentry.plugins.base import Plugin2
 from sentry.plugins.bases import notify
 from sentry.utils import json
 
 from sentry_slack.actions import NotifySlackRoomAction
 
-import urllib
 
 LEVEL_TO_COLOR = {
     'debug': 'cfd3da',
@@ -32,7 +32,7 @@ class SlackOptionsForm(notify.NotificationConfigurationForm):
         widget=forms.TextInput(attrs={'class': 'span8'}))
 
 
-class SlackPlugin(notify.NotificationPlugin):
+class SlackPlugin(Plugin2):
     author = 'Sentry Team'
     author_url = 'https://github.com/getsentry'
     resource_links = (
@@ -49,6 +49,9 @@ class SlackPlugin(notify.NotificationPlugin):
 
     def is_configured(self, project):
         return all((self.get_option(k, project) for k in ('webhook',)))
+
+    def get_rules(self, **kwargs):
+        return [NotifySlackRoomAction]
 
     def color_for_group(self, group):
         return '#' + LEVEL_TO_COLOR.get(group.get_level_display(), LEVEL_TO_COLOR['error'])

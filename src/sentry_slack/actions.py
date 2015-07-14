@@ -3,7 +3,6 @@ from __future__ import absolute_import
 from django import forms
 
 from sentry.plugins import plugins
-from sentry.rules import rules
 from sentry.rules.actions.base import EventAction
 
 
@@ -27,7 +26,4 @@ class NotifySlackRoomAction(EventAction):
             return
 
         prefix = self.get_option('label') or 'Rule Triggered'
-        plugin.send_event_to_slack(event, prefix, room=room)
-
-
-rules.add(NotifySlackRoomAction)
+        yield self.future(plugin.send_event_to_slack, event=event, prefix=prefix, room=room)
