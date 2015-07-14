@@ -51,7 +51,7 @@ class SlackPlugin(notify.NotificationPlugin):
         return all((self.get_option(k, project) for k in ('webhook',)))
 
     def color_for_group(self, group):
-        return '#' + LEVEL_TO_COLOR.get(group.get_level_display(), 'error')
+        return '#' + LEVEL_TO_COLOR.get(group.get_level_display(), LEVEL_TO_COLOR['error'])
 
     def webhook_for_project(self, project):
         return self.get_option('webhook', project)
